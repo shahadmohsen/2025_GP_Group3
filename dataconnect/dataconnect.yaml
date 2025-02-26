@@ -1,0 +1,12 @@
+specVersion: "v1beta"
+serviceId: "taif"
+location: "us-central1"
+schema:
+  source: "./schema"
+  datasource:
+    postgresql:
+      database: "fdcdb"
+      cloudSql:
+        instanceId: "taif-fdc"
+      # schemaValidation: "COMPATIBLE"
+connectorDirs: ["./connector"]
