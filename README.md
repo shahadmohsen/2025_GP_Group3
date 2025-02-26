@@ -1,16 +1,21 @@
-# taif
+Taif
 
-A new Flutter project.
+Introduction
 
-## Getting Started
+Taif is a project designed to provide comprehensive support for families with children on the Autism Spectrum Disorder (ASD). The platform addresses key challenges such as delayed diagnoses, lack of awareness, and difficulty in accessing appropriate resources.
+Our primary goal is to empower families by offering:
+* AI-driven early screening tools to identify autism signs at an early stage.
+* An organized calendar system to manage appointments and schedules efficiently.
+* Chatbot for educational tips.
+* A supportive community platform where families can connect, share experiences, and support each other.
+Aligned with Saudi Arabia’s Vision 2030, Taif leverages innovative technologies to enhance healthcare accessibility and create inclusive support services for the autism community.
+Technology
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+The Taif project leverages a wide range of modern technologies to deliver its features efficiently:
+* Programming Language: Python
+* Frameworks and Libraries: Flutter
+* Backend Services: Firebase
+* Collaboration Tools: GitHub, Jira
+* Design Tools: Figma
+* Data Processing: Google Colab
+Launching Instructions
