@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart';
 import 'login.dart';
+import 'homepage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -66,7 +67,8 @@ class _RegisterWidgetState extends State<RegisterWidget> {
         });
 
         _showMessage('✅ تم التسجيل بنجاح: $email');
-        _navigateToLogin();
+        _navigateToHome();
+
       } on FirebaseAuthException catch (e) {
         if (e.code == 'email-already-in-use') {
           _showMessage('⚠️ هذا البريد الإلكتروني مسجل بالفعل.');
@@ -87,7 +89,13 @@ class _RegisterWidgetState extends State<RegisterWidget> {
   void _showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
-
+  /// 🔄 **Navigate to Home Page**
+  void _navigateToHome() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => HomePage()),
+    );
+  }
   /// 🔄 **Navigate to Login Page**
   void _navigateToLogin() {
     Navigator.pushReplacement(
@@ -147,7 +155,7 @@ class _RegisterWidgetState extends State<RegisterWidget> {
                 _buildInputField(
                     controller: _nameController,
                     label: 'الاسم الكامل',
-                    hintText: 'Ahmed M Y Al-Azaiza'),
+                    hintText: 'Ahmed Al-Azaiza'),
                 const SizedBox(height: 16),
                 _buildInputField(
                     controller: _emailController,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
-//import 'package:image_picker/image_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({Key? key}) : super(key: key);
@@ -11,36 +11,91 @@ class EditProfilePage extends StatefulWidget {
 
 class _EditProfilePageState extends State<EditProfilePage> {
   final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  String _email = "";
+  String _originalName = "";
 
-  /*File? _profileImage; // To store the selected image
-  final ImagePicker _picker = ImagePicker();*/
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
 
-  // Function to pick image from gallery
-/*  Future<void> _pickImage() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _profileImage = File(pickedFile.path);
-      });
+  Future<void> _loadUserData() async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      DocumentSnapshot userDoc =
+      await _firestore.collection('users').doc(user.uid).get();
+      if (userDoc.exists) {
+        setState(() {
+          _nameController.text = userDoc['name'] ?? "";
+          _originalName = userDoc['name'] ?? "";
+          _email = userDoc['email'] ?? "";
+        });
+      }
     }
-  }*/
+  }
+
+  Future<void> _updateUserData() async {
+    String newName = _nameController.text.trim();
+
+    // Check if name is empty
+    if (newName.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('⚠️ Name cannot be empty!')),
+      );
+      return;
+    }
+
+    // Check if name is only numbers or more than 10 characters
+    if (!RegExp(r'^(?=.*[a-zA-Zأ-ي]).{1,10}$', unicode: true).hasMatch(newName)) {
+      if (newName.length > 10) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('⚠️ Name must be 10 characters or less!')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('⚠️ Name must contain at least one letter!')),
+        );
+      }
+      return;
+    }
+
+    // Check if name is the same as original
+    if (newName == _originalName) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('⚠️ No changes detected.')),
+      );
+      return;
+    }
+
+    User? user = _auth.currentUser;
+    if (user != null) {
+      await _firestore.collection('users').doc(user.uid).update({
+        'name': newName,
+      });
+      setState(() {
+        _originalName = newName;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('✅ Profile updated successfully!')),
+      );
+    }
+  }
 
   @override
   void dispose() {
-    // Dispose controllers when no longer needed
     _nameController.dispose();
-    _emailController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7ECCA), // Yellow background
+      backgroundColor: const Color(0xFFF7ECCA),
       body: Stack(
         children: [
-          // White background section
           Positioned(
             top: 150,
             left: 0,
@@ -49,7 +104,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               width: double.infinity,
               height: MediaQuery.of(context).size.height - 150,
               decoration: const BoxDecoration(
-                color: Color(0xFFFEFBFA), // White background
+                color: Color(0xFFFEFBFA),
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(40),
                   topRight: Radius.circular(40),
@@ -58,7 +113,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
             ),
           ),
 
-          // Back button
           Positioned(
             top: 50,
             left: 10,
@@ -68,36 +122,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
             ),
           ),
 
-          // Profile Image with upload option
-          Positioned(
-            top: 100,
-            left: MediaQuery.of(context).size.width / 2 - 50,
-            child: Stack(
-              children: [
-                CircleAvatar(
-                  radius: 50,
-                  //backgroundImage: _profileImage != null
-                     // ? FileImage(_profileImage!)
-                  //    : const AssetImage('assets/images/profile.png')
-                //  as ImageProvider,
-                ),
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: GestureDetector(
-                   // onTap: _pickImage, // Upload functionality
-                    child: CircleAvatar(
-                      radius: 15,
-                      backgroundColor: Colors.grey[200],
-                      child: const Icon(Icons.camera_alt, size: 15, color: Colors.black),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Form Section (Text Fields and Buttons)
           Positioned(
             top: 250,
             left: 0,
@@ -105,21 +129,21 @@ class _EditProfilePageState extends State<EditProfilePage> {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 25.0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end, // Align titles to the right
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  // Username field
                   const Text(
                     'اسم المستخدم',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.right, // Title aligned right
+                    textAlign: TextAlign.right,
                   ),
                   const SizedBox(height: 8),
                   TextField(
-                    textAlign: TextAlign.right, // Input text aligned right
+                    textAlign: TextAlign.right,
                     controller: _nameController,
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: const Color.fromRGBO(255, 227, 153, 0.5),
+                      fillColor: const Color.fromRGBO(
+                          255, 246, 209, 1.0),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                         borderSide: BorderSide.none,
@@ -128,19 +152,19 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Email field
                   const Text(
                     'البريد الإلكتروني',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.right, // Title aligned right
+                    textAlign: TextAlign.right,
                   ),
                   const SizedBox(height: 8),
                   TextField(
-                    textAlign: TextAlign.right, // Input text aligned right
-                    controller: _emailController,
+                    textAlign: TextAlign.right,
+                    controller: TextEditingController(text: _email),
+                    readOnly: true,
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: const Color.fromRGBO(255, 227, 153, 0.5),
+                      fillColor: const Color.fromRGBO(255, 246, 209, 1.0),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                         borderSide: BorderSide.none,
@@ -149,13 +173,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Save Button
                   ElevatedButton(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('!تم التعديل بنجاح')),
-                      );
-                    },
+                    onPressed: _updateUserData,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFFFE399),
                       minimumSize: const Size(double.infinity, 50),
@@ -163,22 +182,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child: const Text('حفظ التعديلات', style: TextStyle(color: Colors.black)),
+                    child: const Text(
+                        'حفظ التعديلات', style: TextStyle(color: Colors.white)),
                   ),
                   const SizedBox(height: 12),
 
-                  // Cancel Button
-                  OutlinedButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Colors.red),
-                      minimumSize: const Size(double.infinity, 50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    child: const Text('إلغاء', style: TextStyle(color: Colors.red)),
-                  ),
+
                 ],
               ),
             ),
