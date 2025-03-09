@@ -1,0 +1,67 @@
+{
+  "project_info": {
+    "project_number": "809645156846",
+    "project_id": "taif-7f2ea",
+    "storage_bucket": "taif-7f2ea.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:809645156846:android:35391b549c52a28c0b86ff",
+        "android_client_info": {
+          "package_name": "com.example.taif"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBgpd1fjdCXdVCFlreXUrtQFAqwGXAplLE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:809645156846:android:570296b1fdd5c1c00b86ff",
+        "android_client_info": {
+          "package_name": "com.example.taif.debug"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBgpd1fjdCXdVCFlreXUrtQFAqwGXAplLE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:809645156846:android:58801550125d931f0b86ff",
+        "android_client_info": {
+          "package_name": "com.taifapp.taif"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBgpd1fjdCXdVCFlreXUrtQFAqwGXAplLE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
