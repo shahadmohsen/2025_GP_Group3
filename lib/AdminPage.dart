@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'manageprofile.dart'; // Update this import path
-import 'clinics.dart';
-class HomePage extends StatelessWidget {
+import 'AddClinic.dart';
+import 'manageprofile.dart';
+class AdminPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,30 +25,30 @@ class HomePage extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _buildNavItem(context, Icons.person, "الحساب", false),
-            _buildNavItem(context, Icons.local_hospital, "العيادات", false),
+            _buildNavItem(context,Icons.person, "الحساب", false),
+            _buildNavItem(context,Icons.add_circle_outline, "إضافة عيادة", false),
             _buildMainNavItem(),
-            _buildNavItem(context, Icons.calendar_today, "المواعيد", false),
-            _buildNavItem(context, Icons.android, "اسألني", false),
+            _buildNavItem(context,Icons.lightbulb_outline, "الاقتراحات", false),
+
           ],
         ),
       ),
     );
   }
 
-  Widget _buildNavItem(BuildContext context, IconData icon, String label, bool isActive) {
+  Widget _buildNavItem(BuildContext context, IconData icon, String label, bool isActive){
     return GestureDetector(
       onTap: () {
+        if (label == "إضافة عيادة") {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => AddClinicPage()),
+          );
+        }
         if (label == "الحساب") {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => ManageProfile()),
-          );
-        }
-        if (label == "العيادات") {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => ListOfClinicsWidget()),
           );
         }
         // You can add similar navigation for other nav items if needed

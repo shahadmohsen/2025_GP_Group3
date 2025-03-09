@@ -1,53 +1,98 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'congratulations.dart';
+
 class NewPasswordPage extends StatefulWidget {
-  const NewPasswordPage({super.key});
+  final String email; // User's email passed from the previous screen
+
+  const NewPasswordPage({super.key, required this.email});
 
   @override
   _NewPasswordPageState createState() => _NewPasswordPageState();
 }
 
 class _NewPasswordPageState extends State<NewPasswordPage> {
+  final TextEditingController _newPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
   bool _isObscuredNewPassword = true;
   bool _isObscuredConfirmPassword = true;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  // 🔹 Function to update password
+  Future<void> _updatePassword() async {
+    String newPassword = _newPasswordController.text.trim();
+    String confirmPassword = _confirmPasswordController.text.trim();
+
+    // 🔸 Validate input
+    if (newPassword.isEmpty || confirmPassword.isEmpty) {
+      _showMessage("Please fill in both fields.");
+      return;
+    }
+    if (newPassword.length < 8) {
+      _showMessage("Password must be at least 8 characters long.");
+      return;
+    }
+    if (newPassword != confirmPassword) {
+      _showMessage("Passwords do not match.");
+      return;
+    }
+
+    try {
+      // 🔹 Get the current user
+      User? user = _auth.currentUser;
+
+      if (user != null) {
+        // 🔹 Update password in Firebase Authentication
+        await user.updatePassword(newPassword);
+
+        // 🔹 Update password in Firestore (if using Firestore)
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid) // Using UID as document ID
+            .update({'password': newPassword}); // ⚠️ Store hashed passwords in production!
+
+        // 🔹 Navigate to success page
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const CongratulationsPage()),
+        );
+
+        _showMessage("Password updated successfully!");
+      } else {
+        _showMessage("User not found. Please log in again.");
+      }
+    } catch (e) {
+      _showMessage("Error updating password: $e");
+    }
+  }
+
+  // 🔹 Function to display messages
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Directionality(
-      textDirection: TextDirection.ltr, // ✅ Ensures RTL layout
+      textDirection: TextDirection.ltr,
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          iconTheme: const IconThemeData(color: Colors.black), // ✅ Back button
+          iconTheme: const IconThemeData(color: Colors.black),
         ),
         body: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center, // ✅ Center text
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              // ✅ Lock Icon in Box
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFF8E7), // Light background
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Text(
-                  '***',
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
               const SizedBox(height: 16),
-
-              // ✅ Title: "Enter New Password"
               const Text(
-                '!ادخل كلمة المرور الجديدة',
+                'ادخل كلمة المرور الجديدة',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 24,
@@ -56,22 +101,11 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
                   fontFamily: 'IBM Plex Sans Arabic',
                 ),
               ),
-              const SizedBox(height: 8),
-
-              // ✅ Subtitle: Password instructions
-              const Text(
-                '!قم بادخال كلمة المرور الجديدة ويجب ان تكون مكونه من 8 خانات',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF7A7A7A),
-                  fontFamily: 'IBM Plex Sans Arabic',
-                ),
-              ),
               const SizedBox(height: 32),
 
-              // ✅ New Password Field
+              // 🔹 New Password Field
               _buildPasswordField(
+                controller: _newPasswordController,
                 label: 'كلمة المرور الجديدة',
                 obscureText: _isObscuredNewPassword,
                 toggleVisibility: () {
@@ -83,8 +117,9 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
 
               const SizedBox(height: 16),
 
-              // ✅ Confirm New Password Field
+              // 🔹 Confirm Password Field
               _buildPasswordField(
+                controller: _confirmPasswordController,
                 label: 'تأكيد كلمة المرور الجديدة',
                 obscureText: _isObscuredConfirmPassword,
                 toggleVisibility: () {
@@ -96,10 +131,8 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
 
               const SizedBox(height: 24),
 
-              // ✅ Change Password Button
+              // 🔹 Change Password Button
               _buildChangePasswordButton(),
-
-              const SizedBox(height: 16),
             ],
           ),
         ),
@@ -107,8 +140,9 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
     );
   }
 
-  // 🔹 Custom Widget: Password Input Field
+  // 🔹 Custom Password Field
   Widget _buildPasswordField({
+    required TextEditingController controller,
     required String label,
     required bool obscureText,
     required VoidCallback toggleVisibility,
@@ -127,6 +161,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
         ),
         const SizedBox(height: 6),
         TextField(
+          controller: controller,
           obscureText: obscureText,
           textAlign: TextAlign.end,
           decoration: InputDecoration(
@@ -151,7 +186,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
     );
   }
 
-  // 🔹 Custom Widget: Change Password Button
+  // 🔹 Change Password Button
   Widget _buildChangePasswordButton() {
     return SizedBox(
       width: double.infinity,
@@ -163,13 +198,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
           ),
           padding: const EdgeInsets.symmetric(vertical: 14),
         ),
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const CongratulationsPage()),
-          );
-          // TODO: Implement password change logic
-        },
+        onPressed: _updatePassword,
         child: const Text(
           'تغيير كلمة المرور',
           style: TextStyle(

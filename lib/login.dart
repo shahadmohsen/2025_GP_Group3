@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'forgetpass.dart';
+import 'homepage.dart';
 import 'main.dart'; // ✅ Import your register page
+import 'AdminPage.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -45,11 +47,32 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => _isLoading = true);
 
     try {
-      await FirebaseAuth.instance
-          .signInWithEmailAndPassword(email: email, password: password);
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-      _showMessage('✅ تسجيل الدخول بنجاح!');
-      // 🔄 Navigate to the main app page after login
+      _showMessage('✅ تسجيل الدخوللل بنجاح!');
+
+      // Delay navigation slightly to allow Snackbar to show
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          // Check if this is a special account
+          if (email == "web29970@gmail.com") {
+            // Navigate to admin page
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => AdminPage()),
+            );
+          } else {
+            // Navigate to regular homepage
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => HomePage()),
+            );
+          }
+        }
+      });
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         _showMessage('⚠️ لم يتم العثور على حساب بهذا البريد الإلكتروني.');
@@ -64,6 +87,8 @@ class _LoginPageState extends State<LoginPage> {
       setState(() => _isLoading = false);
     }
   }
+
+
 
   /// 📝 **Show message in Snackbar**
   void _showMessage(String message) {

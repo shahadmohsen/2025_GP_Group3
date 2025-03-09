@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'edit_profile.dart';
 import 'help_center_page.dart';
+import 'login.dart'; // Import your login page here
 
 class ManageProfile extends StatefulWidget {
   const ManageProfile({super.key});
@@ -11,6 +14,52 @@ class ManageProfile extends StatefulWidget {
 
 class _ManageProfileState extends State<ManageProfile> {
   bool _notificationsEnabled = true;
+  String _userName = ""; // Variable to store user's name
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+
+        if (userDoc.exists) {
+          setState(() {
+            _userName = userDoc['name'] ?? "User"; // Default to "User" if name is not found
+          });
+        }
+      } catch (e) {
+        print("Error loading user data: $e");
+        setState(() {
+          _userName = "User";
+        });
+      }
+    }
+  }
+
+  Future<void> _logout() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      // Navigate to login page and remove all previous routes
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const LoginPage()),
+            (Route<dynamic> route) => false,
+      );
+    } catch (e) {
+      print("Logout error: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('حدث خطأ أثناء تسجيل الخروج')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,14 +83,7 @@ class _ManageProfileState extends State<ManageProfile> {
               ),
             ),
           ),
-          Positioned(
-            top: 100,
-            left: MediaQuery.of(context).size.width / 2 - 50,
-            child: const CircleAvatar(
-              radius: 50,
-              backgroundImage: AssetImage('assets/images/profile.png'),
-            ),
-          ),
+
           Positioned(
             top: 60,
             left: MediaQuery.of(context).size.width / 2 - 40,
@@ -70,9 +112,9 @@ class _ManageProfileState extends State<ManageProfile> {
             right: 0,
             child: Column(
               children: [
-                const Text(
-                  'John Smith',
-                  style: TextStyle(
+                Text(
+                  _userName, // Dynamic username
+                  style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF0E3E3E),
@@ -109,11 +151,7 @@ class _ManageProfileState extends State<ManageProfile> {
                         TextButton(
                           onPressed: () {
                             Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('تم تسجيل الخروج.'),
-                              ),
-                            );
+                            _logout(); // Call logout method
                           },
                           child: const Text('تأكيد'),
                         ),

@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'login.dart';
 import 'new_password.dart';
+
 class OTPVerificationPage extends StatefulWidget {
-  const OTPVerificationPage({super.key});
+  final String verificationId; // Required for Firebase OTP Verification
+  final String email; // The email to which OTP was sent
+
+  const OTPVerificationPage({
+    super.key,
+    required this.verificationId,
+    required this.email,
+  });
 
   @override
   _OTPVerificationPageState createState() => _OTPVerificationPageState();
@@ -13,6 +22,8 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
   final TextEditingController _digit2 = TextEditingController();
   final TextEditingController _digit3 = TextEditingController();
   final TextEditingController _digit4 = TextEditingController();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
   int _secondsRemaining = 59;
   bool _canResend = false;
 
@@ -37,10 +48,51 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
     });
   }
 
+  // 🔹 Function to verify OTP
+  Future<void> _verifyOTP() async {
+    String otpCode =
+        "${_digit1.text}${_digit2.text}${_digit3.text}${_digit4.text}";
+
+    if (otpCode.length != 4) {
+      _showMessage("Please enter the complete OTP.");
+      return;
+    }
+
+    try {
+      // 🔹 Verify OTP with Firebase
+      PhoneAuthCredential credential = PhoneAuthProvider.credential(
+        verificationId: widget.verificationId,
+        smsCode: otpCode,
+      );
+
+      // 🔹 Sign in the user with the verified OTP
+      await _auth.signInWithCredential(credential);
+
+      // 🔹 Navigate to Reset Password Page
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => NewPasswordPage(email: widget.email),
+        ),
+      );
+
+      _showMessage("OTP Verified Successfully!");
+    } catch (e) {
+      _showMessage("Invalid OTP. Please try again.");
+    }
+  }
+
+  // 🔹 Function to display messages
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Directionality(
-      textDirection: TextDirection.ltr, // ✅ RTL support
+      textDirection: TextDirection.ltr,
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.transparent,
@@ -54,7 +106,7 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
             children: [
               const SizedBox(height: 70),
 
-              // ✅ Lock Icon (Centered)
+              // 🔹 Lock Icon
               Container(
                 padding: const EdgeInsets.all(15),
                 decoration: BoxDecoration(
@@ -65,7 +117,7 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
               ),
               const SizedBox(height: 20),
 
-              // ✅ Title
+              // 🔹 Title
               const Text(
                 'ادخل رمز التحقق',
                 style: TextStyle(
@@ -77,7 +129,7 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
               ),
               const SizedBox(height: 8),
 
-              // ✅ Subtitle
+              // 🔹 Subtitle
               const Text(
                 'لقد قمنا بإرسال رمز التأكيد للبريد الإلكتروني التالي',
                 style: TextStyle(
@@ -88,10 +140,10 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
               ),
               const SizedBox(height: 4),
 
-              // ✅ Email Address
-              const Text(
-                'example@gmail.com',
-                style: TextStyle(
+              // 🔹 Email Address
+              Text(
+                widget.email,
+                style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
@@ -100,7 +152,7 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
               ),
               const SizedBox(height: 24),
 
-              // ✅ OTP Input Fields
+              // 🔹 OTP Input Fields
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -115,7 +167,7 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
               ),
               const SizedBox(height: 20),
 
-              // ✅ Countdown Timer
+              // 🔹 Countdown Timer
               Text(
                 _secondsRemaining > 0
                     ? "00:${_secondsRemaining.toString().padLeft(2, '0')}"
@@ -128,7 +180,7 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
               ),
               const SizedBox(height: 8),
 
-              // ✅ Resend Code Option
+              // 🔹 Resend Code Option
               _canResend
                   ? TextButton(
                 onPressed: () {
@@ -158,7 +210,7 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
               ),
               const SizedBox(height: 24),
 
-              // ✅ Verify Button
+              // 🔹 Verify Button
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -169,14 +221,7 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const NewPasswordPage()),
-                    );
-
-                    // TODO: Add verification logic
-                  },
+                  onPressed: _verifyOTP,
                   child: const Text(
                     'تحقق',
                     style: TextStyle(
@@ -190,15 +235,15 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
               ),
               const SizedBox(height: 24),
 
-              // ✅ "Remember Password?" & "Login"
+              // 🔹 "Remember Password?" & "Login"
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   TextButton(
                     onPressed: () {
-                      Navigator.push(
+                      Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (context) => const LoginPage()), // ✅ Ensure LoginPage is imported
+                        MaterialPageRoute(builder: (context) => const LoginPage()),
                       );
                     },
                     child: const Text(
@@ -211,7 +256,6 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
                       ),
                     ),
                   ),
-
                   const Text(
                     'تذكرت كلمة المرور؟',
                     style: TextStyle(
