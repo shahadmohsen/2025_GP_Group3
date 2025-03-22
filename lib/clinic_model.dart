@@ -59,14 +59,18 @@ class ClinicService {
   final CollectionReference clinicsCollection =
   FirebaseFirestore.instance.collection('clinics');
 
-  // Add a new clinic
+  // Check if user is admin
+  bool _isUserAdmin() {
+    final user = FirebaseAuth.instance.currentUser;
+    return user != null && user.email == "web29970@gmail.com";
+  }
+
+  // Add a new clinic (only admin)
   Future<void> addClinic(Clinic clinic) async {
-    // Check if user is authenticated (optional, depending on your security rules)
-    /*
-    if (FirebaseAuth.instance.currentUser == null) {
-      throw Exception('User must be logged in to add a clinic');
+    // Check if user is admin
+    if (!_isUserAdmin()) {
+      throw Exception('فقط المشرف يمكنه إضافة عيادات');
     }
-    */
 
     try {
       await clinicsCollection.add(clinic.toFirestore());
@@ -79,7 +83,7 @@ class ClinicService {
     }
   }
 
-  // Fetch clinics from Firestore
+  // Fetch clinics from Firestore (available to all users)
   Stream<List<Clinic>> getClinics() {
     return clinicsCollection
         .orderBy('createdAt', descending: true) // Show newest first
@@ -88,13 +92,23 @@ class ClinicService {
         snapshot.docs.map((doc) => Clinic.fromFirestore(doc)).toList());
   }
 
-  // Update a clinic
+  // Update a clinic (only admin)
   Future<void> updateClinic(String id, Map<String, dynamic> data) async {
+    // Check if user is admin
+    if (!_isUserAdmin()) {
+      throw Exception('فقط المشرف يمكنه تعديل العيادات');
+    }
+
     await clinicsCollection.doc(id).update(data);
   }
 
-  // Delete a clinic
+  // Delete a clinic (only admin)
   Future<void> deleteClinic(String id) async {
+    // Check if user is admin
+    if (!_isUserAdmin()) {
+      throw Exception('فقط المشرف يمكنه حذف العيادات');
+    }
+
     await clinicsCollection.doc(id).delete();
   }
 }

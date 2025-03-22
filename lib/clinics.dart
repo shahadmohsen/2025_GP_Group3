@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'clinic_model.dart';
 import 'AddClinic.dart'; // Import the AddClinicPage
 
+// Modify your existing ListOfClinicsWidget class to accept an onClinicTap callback:
 class ListOfClinicsWidget extends StatefulWidget {
-  const ListOfClinicsWidget({super.key});
+  final Function(Clinic)? onClinicTap;
+
+  const ListOfClinicsWidget({
+    super.key,
+    this.onClinicTap,
+  });
 
   @override
   State<ListOfClinicsWidget> createState() => _ListOfClinicsWidgetState();
@@ -14,6 +21,7 @@ class _ListOfClinicsWidgetState extends State<ListOfClinicsWidget> {
   final TextEditingController searchController = TextEditingController();
   final ClinicService _clinicService = ClinicService();
   bool _isLoading = true;
+  bool _isAdmin = false; // Flag to check if user is admin
 
   List<Clinic> clinics = [];
   List<Clinic> filteredClinics = [];
@@ -21,7 +29,19 @@ class _ListOfClinicsWidgetState extends State<ListOfClinicsWidget> {
   @override
   void initState() {
     super.initState();
+    _checkAdminStatus();
     _fetchClinics();
+  }
+
+  // Check if current user is admin
+  Future<void> _checkAdminStatus() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      // Check if the current user email is the admin email
+      setState(() {
+        _isAdmin = user.email == "web29970@gmail.com";
+      });
+    }
   }
 
   void _fetchClinics() {
@@ -116,51 +136,52 @@ class _ListOfClinicsWidgetState extends State<ListOfClinicsWidget> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                // Delete button
-                                IconButton(
-                                  icon: const Icon(Icons.delete, color: Colors.red),
-                                  onPressed: () async {
-                                    // Show confirmation dialog
-                                    bool confirm = await showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return AlertDialog(
-                                          title: const Text('تأكيد الحذف'),
-                                          content: const Text('هل أنت متأكد من حذف هذه العيادة؟'),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () => Navigator.of(context).pop(false),
-                                              child: const Text('إلغاء'),
-                                            ),
-                                            TextButton(
-                                              onPressed: () => Navigator.of(context).pop(true),
-                                              child: const Text('حذف'),
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    ) ?? false;
+                                // Only show delete button if user is admin
+                                if (_isAdmin)
+                                  IconButton(
+                                    icon: const Icon(Icons.delete, color: Colors.red),
+                                    onPressed: () async {
+                                      // Show confirmation dialog
+                                      bool confirm = await showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: const Text('تأكيد الحذف'),
+                                            content: const Text('هل أنت متأكد من حذف هذه العيادة؟'),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () => Navigator.of(context).pop(false),
+                                                child: const Text('إلغاء'),
+                                              ),
+                                              TextButton(
+                                                onPressed: () => Navigator.of(context).pop(true),
+                                                child: const Text('حذف'),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      ) ?? false;
 
-                                    if (confirm) {
-                                      try {
-                                        await _clinicService.deleteClinic(clinic.id);
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          const SnackBar(
-                                            content: Text('تم حذف العيادة بنجاح'),
-                                            backgroundColor: Colors.green,
-                                          ),
-                                        );
-                                      } catch (e) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(
-                                            content: Text('حدث خطأ أثناء الحذف: ${e.toString()}'),
-                                            backgroundColor: Colors.red,
-                                          ),
-                                        );
+                                      if (confirm) {
+                                        try {
+                                          await _clinicService.deleteClinic(clinic.id);
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(
+                                              content: Text('تم حذف العيادة بنجاح'),
+                                              backgroundColor: Colors.green,
+                                            ),
+                                          );
+                                        } catch (e) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                              content: Text('حدث خطأ أثناء الحذف: ${e.toString()}'),
+                                              backgroundColor: Colors.red,
+                                            ),
+                                          );
+                                        }
                                       }
-                                    }
-                                  },
-                                ),
+                                    },
+                                  ),
                                 // Clinic name and category
                                 Expanded(
                                   child: Column(
@@ -264,14 +285,23 @@ class _ListOfClinicsWidgetState extends State<ListOfClinicsWidget> {
             ],
           ),
         ),
-        floatingActionButton: FloatingActionButton(
+        // Only show the Add Clinic button if user is admin
+        floatingActionButton: _isAdmin ? FloatingActionButton(
           onPressed: () async {
             // Navigate to AddClinicPage and wait for result
+            final result = await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const AddClinicPage()),
+            );
 
+            // Refresh the list if a clinic was added
+            if (result == true) {
+              _fetchClinics();
+            }
           },
           backgroundColor: const Color(0xFFFFE399),
           child: const Icon(Icons.add, color: Colors.white),
-        ),
+        ) : null,
       ),
     );
   }

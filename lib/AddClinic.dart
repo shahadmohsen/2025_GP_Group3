@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 import 'clinic_model.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Optional, if you're using authentication
+import 'package:firebase_auth/firebase_auth.dart'; // Used for authentication
 
 class AddClinicPage extends StatefulWidget {
   const AddClinicPage({super.key});
@@ -33,6 +33,38 @@ class _AddClinicPageState extends State<AddClinicPage> {
   ];
 
   bool _isLoading = false; // Loading state to show progress
+  bool _isAdmin = false; // Flag to check if user is admin
+
+  @override
+  void initState() {
+    super.initState();
+    _checkAdminStatus();
+  }
+
+  // Check if current user is admin
+  Future<void> _checkAdminStatus() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      // Check if the current user email is the admin email
+      setState(() {
+        _isAdmin = user.email == "web29970@gmail.com";
+      });
+
+      // If not admin, show unauthorized message and go back
+      if (!_isAdmin) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _showErrorDetails('غير مصرح لك بإضافة عيادات. فقط المشرف يمكنه القيام بذلك.');
+          Navigator.of(context).pop(); // Go back to previous page
+        });
+      }
+    } else {
+      // User not logged in
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showErrorDetails('يرجى تسجيل الدخول أولاً.');
+        Navigator.of(context).pop(); // Go back to previous page
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -83,179 +115,186 @@ class _AddClinicPageState extends State<AddClinicPage> {
           iconTheme: const IconThemeData(color: Colors.black),
         ),
         backgroundColor: Colors.white,
-        body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start, // Changed to start for RTL support
-              children: [
-                // Title
-                const Center(
-                  child: Text(
-                    'تفاصيل العيادة',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Color(0xFFFFE399),
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-
-                const Text(
-                  'يرجى تقديم المعلومات حول العيادة. جميع الحقول اختيارية.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.black, fontSize: 14),
-                ),
-                const SizedBox(height: 20),
-
-                // Text Fields - all optional
-                buildTextField('إسم العيادة', nameController),
-
-                // Dropdown for Category
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 15),
-                  child: DropdownButtonFormField<String>(
-                    decoration: InputDecoration(
-                      labelText: 'الفئة',
-                      labelStyle: const TextStyle(color: Colors.black54, fontSize: 15),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: const BorderSide(
-                          color: Color(0xFFFFE399),
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: const BorderSide(
-                          color: Color(0xFFFFE399),
-                          width: 2,
-                        ),
-                      ),
-                      filled: true,
-                      fillColor: Colors.white,
-                    ),
-                    value: selectedCategory,
-                    hint: const Text('اختر الفئة (اختياري)'),
-                    isExpanded: true,
-                    alignment: Alignment.centerRight,
-                    items: categoryOptions.map((String category) {
-                      return DropdownMenuItem<String>(
-                        value: category,
-                        alignment: Alignment.centerRight,
-                        child: Text(
-                          category,
-                          textAlign: TextAlign.right,
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        selectedCategory = newValue;
-                      });
-                    },
-                  ),
-                ),
-
-                buildTextField('العنوان', addressController),
-                buildTextField('ساعات العمل', workingHoursController),
-                buildTextField('رقم الهاتف', phoneController),
-                buildTextField('البريد الالكتروني', emailController),
-                buildTextField('وصف العيادة', descriptionController),
-
-                const SizedBox(height: 30),
-                Center(
-                  child: _isLoading
-                      ? const CircularProgressIndicator(color: Color(0xFFFFE399))
-                      : ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFFE399),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      minimumSize: const Size(260, 54),
-                    ),
-                    onPressed: () async {
-                      // Set loading state
-                      setState(() {
-                        _isLoading = true;
-                      });
-
-                      try {
-                        // Debugging: Check if user is authenticated (if using Firebase Auth)
-                        /*
-                        final user = FirebaseAuth.instance.currentUser;
-                        if (user == null) {
-                          throw Exception('المستخدم غير مسجل الدخول. يرجى تسجيل الدخول أولاً.');
-                        }
-                        */
-
-                        // Create a new Clinic object with possibly empty fields
-                        final Clinic newClinic = Clinic(
-                          id: '', // This will be set by Firestore
-                          name: nameController.text,
-                          category: selectedCategory ?? '',
-                          address: addressController.text,
-                          workingHours: workingHoursController.text,
-                          contactInfo: '', // Empty string since we removed this field
-                          phone: phoneController.text,
-                          email: emailController.text,
-                          description: descriptionController.text.isNotEmpty
-                              ? descriptionController.text
-                              : null,
-                        );
-
-                        // Save to Firestore
-                        await _clinicService.addClinic(newClinic);
-
-                        // Reset loading state
-                        setState(() {
-                          _isLoading = false;
-                        });
-
-                        // Show success message
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('تمت إضافة العيادة بنجاح'),
-                            backgroundColor: Colors.green,
-                            duration: Duration(seconds: 2),
-                          ),
-                        );
-
-                        // Navigate back to the previous screen
-                        Navigator.of(context).pop(true); // Pass true to indicate a clinic was added
-                      } catch (e) {
-                        // Reset loading state
-                        setState(() {
-                          _isLoading = false;
-                        });
-
-                        // Show specific error messages
-                        if (e.toString().contains('permission-denied')) {
-                          _showErrorDetails(
-                              'ليس لديك الصلاحية لإضافة عيادة. يرجى التحقق من قواعد الأمان في Firebase.'
-                                  '\n\nتفاصيل الخطأ: ${e.toString()}'
-                          );
-                        } else {
-                          _showErrorDetails('حدث خطأ: ${e.toString()}');
-                        }
-                      }
-                    },
-                    child: const Text(
-                      'إضافة العيادة',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-              ],
-            ),
+        body: _isAdmin ? _buildMainContent() : const Center(
+          child: Text('فقط المشرف يمكنه إضافة العيادات',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMainContent() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start, // Changed to start for RTL support
+          children: [
+            // Title
+            const Center(
+              child: Text(
+                'تفاصيل العيادة',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Color(0xFFFFE399),
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+
+            const Text(
+              'يرجى تقديم المعلومات حول العيادة. جميع الحقول اختيارية.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.black, fontSize: 14),
+            ),
+            const SizedBox(height: 20),
+
+            // Text Fields - all optional
+            buildTextField('إسم العيادة', nameController),
+
+            // Dropdown for Category
+            Padding(
+              padding: const EdgeInsets.only(bottom: 15),
+              child: DropdownButtonFormField<String>(
+                decoration: InputDecoration(
+                  labelText: 'الفئة',
+                  labelStyle: const TextStyle(color: Colors.black54, fontSize: 15),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: const BorderSide(
+                      color: Color(0xFFFFE399),
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: const BorderSide(
+                      color: Color(0xFFFFE399),
+                      width: 2,
+                    ),
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+                value: selectedCategory,
+                hint: const Text('اختر الفئة (اختياري)'),
+                isExpanded: true,
+                alignment: Alignment.centerRight,
+                items: categoryOptions.map((String category) {
+                  return DropdownMenuItem<String>(
+                    value: category,
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      category,
+                      textAlign: TextAlign.right,
+                    ),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    selectedCategory = newValue;
+                  });
+                },
+              ),
+            ),
+
+            buildTextField('العنوان', addressController),
+            buildTextField('ساعات العمل', workingHoursController),
+            buildTextField('رقم الهاتف', phoneController),
+            buildTextField('البريد الالكتروني', emailController),
+            buildTextField('وصف العيادة', descriptionController),
+
+            const SizedBox(height: 30),
+            Center(
+              child: _isLoading
+                  ? const CircularProgressIndicator(color: Color(0xFFFFE399))
+                  : ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFFE399),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  minimumSize: const Size(260, 54),
+                ),
+                onPressed: () async {
+                  // Verify user is admin again before proceeding
+                  final user = FirebaseAuth.instance.currentUser;
+                  if (user == null || user.email != "web29970@gmail.com") {
+                    _showErrorDetails('فقط المشرف يمكنه إضافة العيادات.');
+                    return;
+                  }
+
+                  // Set loading state
+                  setState(() {
+                    _isLoading = true;
+                  });
+
+                  try {
+                    // Create a new Clinic object with possibly empty fields
+                    final Clinic newClinic = Clinic(
+                      id: '', // This will be set by Firestore
+                      name: nameController.text,
+                      category: selectedCategory ?? '',
+                      address: addressController.text,
+                      workingHours: workingHoursController.text,
+                      contactInfo: '', // Empty string since we removed this field
+                      phone: phoneController.text,
+                      email: emailController.text,
+                      description: descriptionController.text.isNotEmpty
+                          ? descriptionController.text
+                          : null,
+                    );
+
+                    // Save to Firestore
+                    await _clinicService.addClinic(newClinic);
+
+                    // Reset loading state
+                    setState(() {
+                      _isLoading = false;
+                    });
+
+                    // Show success message
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('تمت إضافة العيادة بنجاح'),
+                        backgroundColor: Colors.green,
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+
+                    // Navigate back to the previous screen
+                    Navigator.of(context).pop(true); // Pass true to indicate a clinic was added
+                  } catch (e) {
+                    // Reset loading state
+                    setState(() {
+                      _isLoading = false;
+                    });
+
+                    // Show specific error messages
+                    if (e.toString().contains('permission-denied')) {
+                      _showErrorDetails(
+                          'ليس لديك الصلاحية لإضافة عيادة. يرجى التحقق من قواعد الأمان في Firebase.'
+                              '\n\nتفاصيل الخطأ: ${e.toString()}'
+                      );
+                    } else {
+                      _showErrorDetails('حدث خطأ: ${e.toString()}');
+                    }
+                  }
+                },
+                child: const Text(
+                  'إضافة العيادة',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+          ],
         ),
       ),
     );
