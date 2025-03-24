@@ -2,15 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'clinic_model.dart';
-import 'AddClinic.dart'; // Import the AddClinicPage
+import 'AddClinic.dart';
+import 'suggestclinic.dart';
 
-// Modify your existing ListOfClinicsWidget class to accept an onClinicTap callback:
 class ListOfClinicsWidget extends StatefulWidget {
   final Function(Clinic)? onClinicTap;
+  final bool isInAdminPanel; // New property to check if widget is used in admin panel
 
   const ListOfClinicsWidget({
     super.key,
     this.onClinicTap,
+    this.isInAdminPanel = false, // Default to false (user context)
   });
 
   @override
@@ -21,7 +23,7 @@ class _ListOfClinicsWidgetState extends State<ListOfClinicsWidget> {
   final TextEditingController searchController = TextEditingController();
   final ClinicService _clinicService = ClinicService();
   bool _isLoading = true;
-  bool _isAdmin = false; // Flag to check if user is admin
+  bool _isAdmin = false;
 
   List<Clinic> clinics = [];
   List<Clinic> filteredClinics = [];
@@ -33,11 +35,9 @@ class _ListOfClinicsWidgetState extends State<ListOfClinicsWidget> {
     _fetchClinics();
   }
 
-  // Check if current user is admin
   Future<void> _checkAdminStatus() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      // Check if the current user email is the admin email
       setState(() {
         _isAdmin = user.email == "web29970@gmail.com";
       });
@@ -81,10 +81,10 @@ class _ListOfClinicsWidgetState extends State<ListOfClinicsWidget> {
   @override
   Widget build(BuildContext context) {
     return Directionality(
-      textDirection: TextDirection.rtl, // Set RTL for the whole screen
+      textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: Colors.white,
-        appBar: AppBar(
+        appBar: widget.isInAdminPanel ? null : AppBar(
           title: const Text(
             'العيادات',
             style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
@@ -98,19 +98,47 @@ class _ListOfClinicsWidgetState extends State<ListOfClinicsWidget> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              TextField(
-                controller: searchController,
-                textAlign: TextAlign.right,
-                onChanged: filterClinics,
-                decoration: InputDecoration(
-                  hintText: 'بحث',
-                  prefixIcon: const Icon(Icons.search),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: searchController,
+                      textAlign: TextAlign.right,
+                      onChanged: filterClinics,
+                      decoration: InputDecoration(
+                        hintText: 'بحث',
+                        prefixIcon: const Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey.shade200,
+                      ),
+                    ),
                   ),
-                  filled: true,
-                  fillColor: Colors.grey.shade200,
-                ),
+                  // Only show suggest button if not in admin panel
+                  if (!widget.isInAdminPanel) ...[
+                    SizedBox(width: 10),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => SuggestClinicPage()),
+                        );
+                      },
+                      icon: const Icon(Icons.lightbulb_outline),
+                      label: const Text('اقتراح عيادة'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFFFE399),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      ),
+                    ),
+                  ],
+                ],
               ),
               const SizedBox(height: 20),
               Expanded(
@@ -136,8 +164,9 @@ class _ListOfClinicsWidgetState extends State<ListOfClinicsWidget> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                // Only show delete button if user is admin
-                                if (_isAdmin)
+                                // Only show delete button if user is admin and not in admin panel
+                                // (because AdminClinicsList has its own delete functionality)
+                                if (_isAdmin && !widget.isInAdminPanel)
                                   IconButton(
                                     icon: const Icon(Icons.delete, color: Colors.red),
                                     onPressed: () async {
@@ -285,8 +314,8 @@ class _ListOfClinicsWidgetState extends State<ListOfClinicsWidget> {
             ],
           ),
         ),
-        // Only show the Add Clinic button if user is admin
-        floatingActionButton: _isAdmin ? FloatingActionButton(
+        // Only show the Add Clinic button if user is admin and not in admin panel
+        floatingActionButton: (_isAdmin && !widget.isInAdminPanel) ? FloatingActionButton(
           onPressed: () async {
             // Navigate to AddClinicPage and wait for result
             final result = await Navigator.push(

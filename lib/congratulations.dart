@@ -46,7 +46,7 @@ class CongratulationsPage extends StatelessWidget {
 
               // ✅ Subtitle: Password changed successfully
               const Text(
-                'لقد تم تغيير كلمة مرور حسابك بنجاح، يمكنك الآن العودة وتسجيل الدخول من جديد',
+                'يُرجى التحقق من بريدك الإلكتروني لتأكيد العملية، ثم يمكنك العودة وتسجيل الدخول من جديد.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14,
