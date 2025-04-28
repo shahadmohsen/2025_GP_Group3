@@ -39,7 +39,7 @@ class _ListOfClinicsWidgetState extends State<ListOfClinicsWidget> {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       setState(() {
-        _isAdmin = user.email == "web29970@gmail.com";
+        _isAdmin = user.email == "admin4@gmail.com";
       });
     }
   }

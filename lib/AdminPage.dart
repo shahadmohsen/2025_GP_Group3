@@ -388,7 +388,6 @@ class _AdminPageState extends State<AdminPage> {
       );
     });
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -412,7 +411,6 @@ class _AdminPageState extends State<AdminPage> {
       ),
       bottomNavigationBar: Container(
         height: 80,
-        padding: const EdgeInsets.only(bottom: 10), // Add padding to move items up a bit
         decoration: const BoxDecoration(
           color: Colors.white,
           boxShadow: [
@@ -423,13 +421,28 @@ class _AdminPageState extends State<AdminPage> {
             ),
           ],
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        child: Stack(
+          alignment: Alignment.bottomCenter,
           children: [
-            _buildNavItem(Icons.person, "الحساب", _currentIndex == 3, () => _onItemTapped(3)),
-            _buildNavItem(Icons.add_circle_outline, "إضافة عيادة", _currentIndex == 2, () => _onItemTapped(2)),
-            _buildMainNavItem(() => _onItemTapped(1)), // Main button for clinic list
-            _buildNavItem(Icons.lightbulb_outline, "الاقتراحات", _currentIndex == 0, () => _onItemTapped(0)),
+            // Regular nav items in a row
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildNavItem(Icons.person, "الحساب", _currentIndex == 3, () => _onItemTapped(3)),
+
+                  // Empty space for the center button
+                  const SizedBox(width: 40),
+                  _buildNavItem(Icons.lightbulb_outline, "الاقتراحات", _currentIndex == 0, () => _onItemTapped(0)),
+                ],
+              ),
+            ),
+            // Centered main button on top
+            Positioned(
+              bottom: 15, // Adjust as needed to align vertically
+              child: _buildMainNavItem(() => _onItemTapped(1)),
+            ),
           ],
         ),
       ),
@@ -456,28 +469,25 @@ class _AdminPageState extends State<AdminPage> {
   }
 
   Widget _buildMainNavItem(VoidCallback onTap) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8), // Add padding to move the button up
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: const Color(0xFFFFE399),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 10,
-                spreadRadius: 3,
-              ),
-            ],
-          ),
-          padding: const EdgeInsets.all(10),
-          child: const Icon(
-            Icons.storefront,
-            color: Colors.white,
-            size: 32,
-          ),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.amberAccent,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 10,
+              spreadRadius: 3,
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(10),
+        child: const Icon(
+          Icons.storefront,
+          color: Colors.white,
+          size: 32,
         ),
       ),
     );

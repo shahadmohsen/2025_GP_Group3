@@ -43,20 +43,20 @@ class _EditProfilePageState extends State<EditProfilePage> {
     // Check if name is empty
     if (newName.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('⚠️ Name cannot be empty!')),
+        const SnackBar(content: Text('لا يمكن أن يكون الاسم فارغًا!')),
       );
       return;
     }
 
     // Check if name is only numbers or more than 10 characters
-    if (!RegExp(r'^(?=.*[a-zA-Zأ-ي]).{1,10}$', unicode: true).hasMatch(newName)) {
-      if (newName.length > 10) {
+    if (!RegExp(r'^(?=.*[a-zA-Zأ-ي]).{1,20}$', unicode: true).hasMatch(newName)) {
+      if (newName.length > 20) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('⚠️ Name must be 10 characters or less!')),
+          const SnackBar(content: Text('يجب ألا يزيد طول الاسم عن 20 حرف!')),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('⚠️ Name must contain at least one letter!')),
+          const SnackBar(content: Text('يجب أن يحتوي الاسم على حرف واحد على الأقل!')),
         );
       }
       return;
@@ -65,7 +65,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     // Check if name is the same as original
     if (newName == _originalName) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('⚠️ No changes detected.')),
+        const SnackBar(content: Text('لم يتم الكشف عن أي تغييرات.')),
       );
       return;
     }
@@ -79,8 +79,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
         _originalName = newName;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('✅ Profile updated successfully!')),
+        const SnackBar(content: Text('✅ تم تحديث الملف الشخصي بنجاح!')),
       );
+
+      // Return the updated name back to the previous screen
+      Navigator.pop(context, newName);
     }
   }
 
@@ -186,8 +189,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         'حفظ التعديلات', style: TextStyle(color: Colors.white)),
                   ),
                   const SizedBox(height: 12),
-
-
                 ],
               ),
             ),

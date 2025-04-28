@@ -61,6 +61,28 @@ class _ManageProfileState extends State<ManageProfile> {
     }
   }
 
+  // Method to navigate to edit profile page
+  void _navigateToEditProfile() async {
+    // Wait for result from edit profile page
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const EditProfilePage(),
+      ),
+    );
+
+    // If name was updated (result is not null)
+    if (result != null && result is String) {
+      setState(() {
+        _userName = result;
+      });
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('✅ تم تحديث الاسم بنجاح')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -84,23 +106,21 @@ class _ManageProfileState extends State<ManageProfile> {
             ),
           ),
 
-          Positioned(
-            top: 60,
-            left: MediaQuery.of(context).size.width / 2 - 40,
-            child: const Text(
-              'الحساب',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
+          Align(
+            alignment: Alignment.topCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 60),
+              child: Text(
+                'الحساب',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
-          const Positioned(
-            top: 50,
-            left: 20,
-            child: Icon(Icons.arrow_back, color: Colors.white, size: 28),
-          ),
+
           const Positioned(
             top: 50,
             right: 20,
@@ -115,20 +135,13 @@ class _ManageProfileState extends State<ManageProfile> {
                 Text(
                   _userName, // Dynamic username
                   style: const TextStyle(
-                    fontSize: 22,
+                    fontSize: 25,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF0E3E3E),
+                    color: Color(0xFF000000),
                   ),
                 ),
                 const SizedBox(height: 40),
-                profileOption(Icons.person, 'تعديل الحساب', () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const EditProfilePage(),
-                    ),
-                  );
-                }),
+                profileOption(Icons.person, 'تعديل الحساب', _navigateToEditProfile),
                 profileOption(Icons.help_outline, 'مساعدة', () {
                   Navigator.push(
                     context,

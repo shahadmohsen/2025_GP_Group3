@@ -5,9 +5,20 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart';
 import 'login.dart';
 import 'homepage.dart';
+import 'welcomepage.dart';
+import 'package:flutter/services.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Set system UI style here
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    systemNavigationBarColor: Colors.white,
+    systemNavigationBarIconBrightness: Brightness.dark,
+    statusBarColor: Colors.transparent,
+    statusBarIconBrightness: Brightness.dark,
+  ));
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -19,14 +30,35 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Call this after the first frame renders
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+        systemNavigationBarColor: Color(0xFFFEFBFA),
+        systemNavigationBarIconBrightness: Brightness.dark,
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+      ));
+    });
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Registration',
       theme: ThemeData(
-        fontFamily: 'IBM Plex Sans Arabic',
+        fontFamily: 'Lateef',
         scaffoldBackgroundColor: const Color(0xFFFEFBFA),
+        canvasColor: Colors.white, // Add this
+        bottomAppBarTheme: const BottomAppBarTheme( // Add this
+          color: Colors.white,
+        ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFFFEFBFA),
+          elevation: 0,
+        ),
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          backgroundColor: Color(0xFFFEFBFA),
+        ),
       ),
-      home: const RegisterWidget(),
+      home: const WelcomePage(),
     );
   }
 }
@@ -130,7 +162,7 @@ class _RegisterWidgetState extends State<RegisterWidget> {
                   child: Text(
                     '!سجّل الآن',
                     style: TextStyle(
-                      color: Color.fromRGBO(27, 19, 42, 1),
+                      color: Color.fromRGBO(0, 0, 0, 1.0),
                       fontSize: 26,
                       fontWeight: FontWeight.w700,
                       fontFamily: 'IBM Plex Sans Arabic',

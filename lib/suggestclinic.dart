@@ -19,16 +19,11 @@ class _SuggestClinicPageState extends State<SuggestClinicPage> {
 
   // List of clinic categories
   final List<String> categories = [
-    'عيادة عامة',
-    'طب الأسنان',
-    'أمراض النساء والتوليد',
-    'طب الأطفال',
-    'أمراض القلب',
-    'طب العيون',
-    'طب الجلدية',
-    'طب العظام',
-    'الطب النفسي',
-    'جراحة عامة',
+    'عيادة',
+    'مستشفى',
+    'مركز طبي',
+    'عيادة مختصة',
+    'مدرسة',
     'أخرى'
   ];
 

@@ -30,7 +30,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
       return;
     }
     if (newPassword.length < 8) {
-      _showMessage("Password must be at least 8 characters long.");
+      _showMessage("يجب ان تكون كلمة المرور على الاقل ٨ حروف.  ");
       return;
     }
     if (newPassword != confirmPassword) {
@@ -58,12 +58,12 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
           MaterialPageRoute(builder: (context) => const CongratulationsPage()),
         );
 
-        _showMessage("Password updated successfully!");
+        _showMessage("تم تغيير كلمة المرور بنجاح!");
       } else {
-        _showMessage("User not found. Please log in again.");
+        _showMessage("لم يتم العثور على المستخدم، الرجاء محاولة مره اخرى.");
       }
     } catch (e) {
-      _showMessage("Error updating password: $e");
+      _showMessage("حدث خطأ: $e");
     }
   }
 

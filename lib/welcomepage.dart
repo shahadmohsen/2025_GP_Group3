@@ -1,74 +1,56 @@
 import 'package:flutter/material.dart';
-
-//import 'package:firebase_core/firebase_core.dart';
-//import 'firebase_options.dart';
-
-/*void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  runApp(const TayfApp());
-}
-*/
-class TayfApp extends StatelessWidget {
-  const TayfApp({Key? key}) : super(key: key);
+import 'main.dart';
+class WelcomePage extends StatelessWidget {
+  const WelcomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        fontFamily: 'IBM Plex Sans Arabic',
-        scaffoldBackgroundColor: const Color(0xFFFEFBFA),
-      ),
-      home: SplashScreen(),
-    );
-  }
-}
+    return Scaffold(
+      backgroundColor: const Color(0xFFFEFBFA),
+      body: Stack(
+        children: [
+          // Yellow corner image
+          Positioned(
+            top: 0,
+            left: 0,
+            child: Image.asset(
+              'assets/images/corner.png',
+              width: 200,
+              fit: BoxFit.cover,
+            ),
+          ),
 
-class SplashScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl, // Set RTL direction for Arabic text
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
+          // Page content
+          Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                const SizedBox(height: 60),
+
+                // Logo
                 Image.asset(
-                  'assets/images/logo.png', // Ensure your logo is in the assets folder
-                  width: 150,
-                  height: 150,
+                  'assets/images/logo.png',
+                  width: 300,
                 ),
-                const SizedBox(height: 20),
-                const Text(
-                  'طَيْف',
-                  style: TextStyle(
-                    fontFamily: 'IBM Plex Sans Arabic',
-                    fontSize: 48,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
-                const SizedBox(height: 10),
+
+                const SizedBox(height: 30),
+
+                // Arabic slogan with blue word
                 RichText(
                   textAlign: TextAlign.center,
                   text: const TextSpan(
+                    text: 'كل يد ممدودة تصنع ',
                     style: TextStyle(
-                      fontFamily: 'IBM Plex Sans Arabic',
-                      fontSize: 24,
+                      fontFamily: 'Lateef',
+                      fontSize: 32,
                       color: Colors.black,
                     ),
                     children: [
-                      TextSpan(text: 'كل يد ممدودة تصنع '),
                       TextSpan(
                         text: 'فرقًا',
                         style: TextStyle(
+                          fontFamily: 'Lateef',
+                          fontSize: 32,
                           color: Color(0xFF80CFEF),
                           fontWeight: FontWeight.bold,
                         ),
@@ -76,29 +58,41 @@ class SplashScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 30),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFFE08A),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
+
+                const SizedBox(height: 60),
+
+                // Button
+                SizedBox(
+                  width: 250,
+                  height: 55,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => const RegisterWidget()),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFFFE399),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                  ),
-                  onPressed: () {},
-                  child: const Text(
-                    'انضم إلينا الآن',
-                    style: TextStyle(
-                      fontFamily: 'IBM Plex Sans Arabic',
-                      fontSize: 24,
-                      color: Colors.black,
+                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+                    label: const Text(
+                      'انضم إلينا الآن',
+                      style: TextStyle(
+                        fontFamily: 'Lateef',
+                        fontSize: 24,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
               ],
             ),
           ),
-        ),
+        ],
       ),
     );
   }

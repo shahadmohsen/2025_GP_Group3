@@ -62,7 +62,7 @@ class ClinicService {
   // Check if user is admin
   bool _isUserAdmin() {
     final user = FirebaseAuth.instance.currentUser;
-    return user != null && user.email == "web29970@gmail.com";
+    return user != null && user.email == "admin4@gmail.com";
   }
 
   // Add a new clinic (only admin)

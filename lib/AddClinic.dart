@@ -29,6 +29,7 @@ class _AddClinicPageState extends State<AddClinicPage> {
     'مستشفى',
     'مركز طبي',
     'عيادة مختصة',
+    'مدرسة',
     'أخرى'
   ];
 
@@ -47,7 +48,7 @@ class _AddClinicPageState extends State<AddClinicPage> {
     if (user != null) {
       // Check if the current user email is the admin email
       setState(() {
-        _isAdmin = user.email == "web29970@gmail.com";
+        _isAdmin = user.email == "admin4@gmail.com";
       });
 
       // If not admin, show unauthorized message and go back
@@ -221,7 +222,7 @@ class _AddClinicPageState extends State<AddClinicPage> {
                 onPressed: () async {
                   // Verify user is admin again before proceeding
                   final user = FirebaseAuth.instance.currentUser;
-                  if (user == null || user.email != "web29970@gmail.com") {
+                  if (user == null || user.email != "admin4@gmail.com") {
                     _showErrorDetails('فقط المشرف يمكنه إضافة العيادات.');
                     return;
                   }
