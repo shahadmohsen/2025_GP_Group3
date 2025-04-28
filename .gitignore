@@ -1,36 +1,20 @@
 # Flutter/Dart/Pub related
-**/build/
+build/
 .dart_tool/
 .packages
 .pub-cache/
 .flutter-plugins
 .flutter-plugins-dependencies
-.metadata
+pubspec.lock
 
-# Android generated
+# Android related
 android/app/build/
-android/build/
-android/.gradle/
-
-# iOS generated
-ios/Flutter/
-ios/Runner.xcworkspace/
-ios/Pods/
-ios/build/
-
-# MacOS generated
-macos/Flutter/
-macos/Runner.xcworkspace/
-macos/Pods/
-macos/build/
-
-# APK and large files
 *.apk
-*.ipa
 *.bin
 
-# VS Code settings
-.vscode/
-
-# Xcode settings
-xcuserdata/
+# iOS related
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/.symlinks
+ios/Pods
+ios/Runner.xcworkspace
