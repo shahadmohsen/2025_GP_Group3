@@ -1,0 +1,13 @@
+#Tue Mar 25 06:30:17 AST 2025
+base.0=/Users/shahadmohsen/StudioProjects/Taif/android/app/build/intermediates/dex/stagingRelease/mergeDexStagingRelease/classes.dex
+base.1=/Users/shahadmohsen/StudioProjects/Taif/android/app/build/intermediates/global_synthetics_dex/stagingRelease/mergeStagingReleaseGlobalSynthetics/classes.dex
+base.2=/Users/shahadmohsen/StudioProjects/Taif/android/app/build/intermediates/dex/stagingRelease/mergeDexStagingRelease/classes2.dex
+base.3=/Users/shahadmohsen/StudioProjects/Taif/android/app/build/intermediates/dex/stagingRelease/mergeDexStagingRelease/classes3.dex
+path.0=classes.dex
+path.1=classes.dex
+path.2=classes2.dex
+path.3=classes3.dex
+renamed.0=classes.dex
+renamed.1=classes2.dex
+renamed.2=classes3.dex
+renamed.3=classes4.dex

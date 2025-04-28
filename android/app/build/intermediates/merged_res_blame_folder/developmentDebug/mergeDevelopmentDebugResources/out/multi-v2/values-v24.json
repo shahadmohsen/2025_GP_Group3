@@ -1,0 +1,19 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.example.taif.app-mergeDevelopmentDebugResources-48:/values-v24/values-v24.xml",
+            "map": [
+                {
+                    "source": "/Users/shahadmohsen/.gradle/caches/8.9/transforms/d62a42724b95192e31d394cf4b37b5f4/transformed/appcompat-1.6.1/res/values-v24/values-v24.xml",
+                    "from": {
+                        "startLines": "2,3",
+                        "startColumns": "4,4",
+                        "startOffsets": "55,212",
+                        "endColumns": "156,134",
+                        "endOffsets": "207,342"
+                    }
+                }
+            ]
+        }
+    ]
+}
