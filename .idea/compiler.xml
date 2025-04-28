@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <bytecodeTargetLevel>
+      <module name="android.path_provider_android" target="20" />
+      <module name="android.url_launcher_android" target="20" />
+      <module name="io.flutter.plugins.firebase.auth.android.firebase_auth" target="20" />
+      <module name="io.flutter.plugins.firebase.cloudfirestore.android.cloud_firestore" target="20" />
+      <module name="io.flutter.plugins.firebase.core.android.firebase_core" target="20" />
+    </bytecodeTargetLevel>
+  </component>
+</project>
